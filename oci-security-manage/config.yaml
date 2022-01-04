@@ -1,0 +1,17 @@
+# This config.yaml file contains information required to update selected OCI
+# Security List and Network Security Group resources.
+
+version: 1
+directory: ~/.oci/
+last-ip: 10.0.0.0
+resources:
+  - name: Prime Compute
+    profile: DEFAULT
+    type: NSG
+    ocid: ocid..example
+    id: ""
+  - name: Web Subnet
+    profile: DEFAULT
+    type: SL
+    ocid: ocid..example2
+    id: ""
