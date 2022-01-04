@@ -3,22 +3,29 @@ package handleyaml
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
+const comment string = `# This config.yaml file contains information required to update selected OCI 
+# Security List and Network Security Group resources.
+
+`
+
 // Configuration contains all data in the config.yaml file
 type Configuration struct {
-	Version        int    `yaml:"version,omitempty"`
-	ConfigLocation string `yaml:"-"`
+	Version        int    `yaml:"version"`
+	configLocation string `yaml:"-"`
 	OciDirectory   string `yaml:"ociDirectory"`
-	LastIp         string `yaml:"lastIp,omitempty"`
+	LastIp         string `yaml:"lastIp"`
 	Resources      []struct {
 		Name    string `yaml:"name"`
 		Profile string `yaml:"profile"`
 		Type    string `yaml:"type"`
 		OCID    string `yaml:"ocid"`
-		Id      string `yaml:"id,omitempty"`
+		Id      string `yaml:"id"`
+		Region  string `yaml:"region"`
 	}
 }
 
@@ -32,9 +39,12 @@ func NewConfig() *Configuration {
 // file location
 func DefaultConfig() *Configuration {
 	c := NewConfig()
-	c.ConfigLocation = "./config.yaml"
 
-	err := c.ReadConfigFile("./config.yaml")
+	// Set default file path to .oci/config.yaml or ./config.yaml if no ~/.oci
+	// directory exists
+	file := setDefaultFileLocation()
+
+	err := c.ReadConfigFile(file)
 	if err != nil {
 		log.Fatalf("Error reading config file: %v\n", err)
 	}
@@ -43,6 +53,13 @@ func DefaultConfig() *Configuration {
 
 // ReadConfigFile attempts to load a config file into a Configuration struct
 func (c *Configuration) ReadConfigFile(file string) error {
+	var err error
+	// Set config file location
+	c.configLocation, err = filepath.Abs(file)
+	if err != nil {
+		return err
+	}
+
 	data, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -57,10 +74,15 @@ func (c *Configuration) ReadConfigFile(file string) error {
 }
 
 // WriteConfig writes overwrites the config.yaml file with updated yaml
-func (c *Configuration) WriteConfig() {
+func (c *Configuration) WriteConfig() error {
 	data, err := yaml.Marshal(&c)
 	if err != nil {
-		log.Fatalf("Error writing to config.yaml file: %v\n", err)
+		return err
 	}
-	log.Println(string(data))
+
+	// Append comments to data before writing
+	data = append([]byte(comment), data...)
+
+	os.WriteFile(c.configLocation, data, 0640)
+	return nil
 }
