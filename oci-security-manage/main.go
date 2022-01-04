@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	c := handleyaml.GetConfig()
-	fmt.Println(handleyaml.GetConfig(), "\n")
+	c := handleyaml.DefaultConfig()
+	fmt.Println(&c, "\n")
 
 	c.WriteConfig()
 }
