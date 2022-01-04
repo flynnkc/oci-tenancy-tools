@@ -1,0 +1,11 @@
+#!/bin/bash
+# OCI_BASTION - OCID of the OCI Bastion
+# PUB_KEY - Public ssh key path
+# OCI_COMPUTE - OCID of the compute to ssh into
+# KEY - Private ssh key path
+
+bash -c "$(oci bastion session get --session-id $(oci bastion session create-managed-ssh \
+--bastion-id "$OCI_BASTION" --ssh-public-key-file "$PUB_KEY" --target-os-username opc \
+--target-resource-id "$OCI_COMPUTE" --wait-for-state SUCCEEDED --session-ttl 1800 | \
+jq .data.resources[0].identifier | sed -e 's/"//g') | jq '.data."ssh-metadata".command' \
+| sed -e 's|^"||' -e 's|"$||' -e 's|\\||g' -e 's|<privateKey>|'"$KEY"'|g')"
