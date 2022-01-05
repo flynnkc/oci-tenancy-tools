@@ -13,6 +13,9 @@ const comment string = `# This config.yaml file contains information required to
 
 `
 
+var debug bool = false
+var logger *log.Logger
+
 // Configuration contains all data in the config.yaml file
 type Configuration struct {
 	Version        int    `yaml:"version"`
@@ -46,7 +49,7 @@ func DefaultConfig() *Configuration {
 
 	err := c.ReadConfigFile(file)
 	if err != nil {
-		log.Fatalf("Error reading config file: %v\n", err)
+		logger.Fatalf("[ERROR] Error reading config file: %v\n", err)
 	}
 	return c
 }
@@ -58,16 +61,23 @@ func (c *Configuration) ReadConfigFile(file string) error {
 	c.configLocation, err = filepath.Abs(file)
 	if err != nil {
 		return err
+	} else if debug {
+		logger.Printf("[DEBUG] Filepath to config file: %v\n", c.configLocation)
 	}
 
 	data, err := os.ReadFile(file)
 	if err != nil {
 		return err
+	} else if debug {
+		logger.Printf("[DEBUG] UTF8 data read from config file starting next line:\n%v\n",
+			string(data))
 	}
 
 	err = yaml.Unmarshal(data, c)
 	if err != nil {
 		return err
+	} else if debug {
+		logger.Printf("[DEBUG] Unmarshaled configuration data:\n%v\n", *c)
 	}
 
 	return nil
@@ -82,7 +92,15 @@ func (c *Configuration) WriteConfig() error {
 
 	// Append comments to data before writing
 	data = append([]byte(comment), data...)
+	if debug {
+		logger.Printf("[DEBUG] Marshaled YAML before WriteFile:\n%v\n", string(data))
+	}
 
 	os.WriteFile(c.configLocation, data, 0640)
 	return nil
+}
+
+// SetEvironment sets the environment variables shared by the application
+func SetEnvironment(d bool, l *log.Logger) {
+	debug, logger = d, l
 }
