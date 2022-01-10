@@ -7,7 +7,7 @@ import (
 )
 
 var config *handleyaml.Configuration
-var debug bool = false
+var debug = false
 var logger *log.Logger
 
 // SetEnvironment sets the environment variables shared by the application
