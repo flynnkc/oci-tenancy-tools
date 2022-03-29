@@ -25,11 +25,14 @@ func main() {
 
 	// Get Configuration struct containing information in config.yaml
 	c := handleyaml.DefaultConfig()
+	if debug {
+		logger.Printf("[DEBUG]: Config packed into struct: %v\n", c)
+	}
 
 	// If IP matches previous IP, do nothing and exit
 	ip := introspect.GetIp(logger)
 	if debug {
-		logger.Printf("[DEBUG] External IP returned: %v\n[DEBUG] Last recorded IP: %v\n",
+		logger.Printf("[DEBUG] External IP returned: %v -- Last recorded IP: %v\n",
 			ip, c.LastIp)
 	}
 	if c.LastIp == ip && !debug {
@@ -37,14 +40,15 @@ func main() {
 		os.Exit(0)
 	}
 
-	cloud.SetConfig(c)
-	cloud.ReadConfig()
-
 	// Set LastIp to returned IP before exiting
-	logger.Printf("INFO: Updating to match current IP %v\n", ip)
+	logger.Printf("[INFO]: Updating to match current IP %v\n", ip)
+
+	cloud.SetEnvironment(debug, logger)
+	cloud.UpdateResources(c, ip)
+
 	c.LastIp = ip
 	if err := c.WriteConfig(); err != nil {
-		logger.Fatalf("ERROR: Failed to write updates to config.yaml: %v", err)
+		logger.Fatalf("[ERROR]: Failed to write updates to config.yaml: %v", err)
 	}
 	os.Exit(0)
 }

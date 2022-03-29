@@ -3,7 +3,8 @@
 
 version: 1
 ociDirectory: ~/.oci/
-lastIp: 10.0.0.0
+lastIp: 75.166.49.189
+exclusionCIDR: 10.0.0.0/16 # Exclude updates if returned address in this range
 resources:
     - name: Prime Compute
       profile: DEFAULT
@@ -11,9 +12,13 @@ resources:
       ocid: ocid..example
       id: ""
       region: us-phoenix-1
+      protocol: 6 # "1" ICMP  "6" TCP  "17" UDP  "58" ICMPv6
+      port: 22
     - name: Web Subnet
       profile: DEFAULT
       type: SL
       ocid: ocid..example2
       id: ""
       region: us-ashburn-1
+      protocol: 6 # "1" ICMP  "6" TCP  "17" UDP  "58" ICMPv6
+      port: 3389

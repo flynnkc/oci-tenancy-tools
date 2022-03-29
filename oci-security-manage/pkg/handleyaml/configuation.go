@@ -12,6 +12,7 @@ const comment string = `# This config.yaml file contains information required to
 # Security List and Network Security Group resources.
 
 `
+const protocolComment string = `# "1" ICMP  "6" TCP  "17" UDP  "58" ICMPv6`
 
 var debug bool = false
 var logger *log.Logger
@@ -22,13 +23,16 @@ type Configuration struct {
 	configLocation string `yaml:"-"`
 	OciDirectory   string `yaml:"ociDirectory"`
 	LastIp         string `yaml:"lastIp"`
+	ExclusionCidr  string `yaml:"exclusionCIDR,omitempty"`
 	Resources      []struct {
-		Name    string `yaml:"name"`
-		Profile string `yaml:"profile"`
-		Type    string `yaml:"type"`
-		OCID    string `yaml:"ocid"`
-		Id      string `yaml:"id"`
-		Region  string `yaml:"region"`
+		Name     string `yaml:"name"`
+		Profile  string `yaml:"profile"`
+		Type     string `yaml:"type"`
+		OCID     string `yaml:"ocid"`
+		Id       string `yaml:"id"`
+		Region   string `yaml:"region"`
+		Port     int    `yaml:"port"`
+		Protocol string `yaml:"protocol"`
 	}
 }
 
@@ -91,7 +95,7 @@ func (c *Configuration) WriteConfig() error {
 	}
 
 	// Append comments to data before writing
-	data = append([]byte(comment), data...)
+	data = addComments(data)
 	if debug {
 		logger.Printf("[DEBUG] Marshaled YAML before WriteFile:\n%v\n", string(data))
 	}
@@ -103,4 +107,10 @@ func (c *Configuration) WriteConfig() error {
 // SetEvironment sets the environment variables shared by the application
 func SetEnvironment(d bool, l *log.Logger) {
 	debug, logger = d, l
+}
+
+// Add comments to config file TODO add protocol comment next to protocol field
+func addComments(data []byte) []byte {
+	data = append([]byte(comment), data...)
+	return data
 }
