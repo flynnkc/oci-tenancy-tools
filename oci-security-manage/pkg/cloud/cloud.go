@@ -27,6 +27,8 @@ func UpdateResources(c *handleyaml.Configuration, ip string) error {
 		logger.Printf("[DEBUG]: Config unpacked into resources: %v\n", rsources)
 	}
 
+	c = c.NewConfigFromBase()
+
 	// Loop through rsources to update
 	var wg sync.WaitGroup
 	for i, r := range rsources {
@@ -36,7 +38,7 @@ func UpdateResources(c *handleyaml.Configuration, ip string) error {
 		wg.Add(1)
 
 		// Fire off goroutines to update resources using anonymous function
-		go func(obj resource) {
+		go func(obj *resource) {
 			defer wg.Done()
 			switch obj.object {
 			case "NSG":
@@ -50,7 +52,10 @@ func UpdateResources(c *handleyaml.Configuration, ip string) error {
 					obj.object, obj.name)
 				return
 			}
-		}(r)
+			// Append resource to new base config object
+			// Is this a good idea? I already have a reference to c
+			appendResourceToConfig(c, obj)
+		}(&r)
 	}
 
 	wg.Wait()

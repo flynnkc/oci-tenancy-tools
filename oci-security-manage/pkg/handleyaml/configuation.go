@@ -58,6 +58,17 @@ func DefaultConfig() *Configuration {
 	return c
 }
 
+// NewConfigFromBase returns a Configuration without Resources
+func (c *Configuration) NewConfigFromBase() Configuration {
+	nc := NewConfig()
+	nc.Version = c.Version
+	nc.configLocation = c.configLocation
+	nc.OciDirectory = c.OciDirectory
+	nc.LastIp = c.LastIp
+	nc.ExclusionCidr = c.ExclusionCidr
+	return nc
+}
+
 // ReadConfigFile attempts to load a config file into a Configuration struct
 func (c *Configuration) ReadConfigFile(file string) error {
 	var err error

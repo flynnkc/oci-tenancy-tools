@@ -44,7 +44,7 @@ func main() {
 	logger.Printf("[INFO]: Updating to match current IP %v\n", ip)
 
 	cloud.SetEnvironment(debug, logger)
-	cloud.UpdateResources(c, ip)
+	cloud.UpdateResources(&c, ip)
 
 	c.LastIp = ip
 	if err := c.WriteConfig(); err != nil {

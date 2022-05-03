@@ -20,6 +20,16 @@ type resource struct {
 	lastIp   string
 }
 
+// setResourceIp does exactly what you think it does
+func (r *resource) setResourceIp(ip string) {
+	r.ip = ip
+}
+
+// setResourceid sets a resource ID
+func (r *resource) setResourceId(id string) {
+	r.id = id
+}
+
 // getNsgId gets and sets the ID for the NSG Rule
 func (r *resource) getNsgSecurityRuleId(client core.VirtualNetworkClient) error {
 	// Create request struct
@@ -45,7 +55,7 @@ func (r *resource) getNsgSecurityRuleId(client core.VirtualNetworkClient) error 
 		}
 		for _, item := range resp.Items {
 			if *item.Source == (r.lastIp+"/32") && *item.TcpOptions.SourcePortRange.Max == r.port {
-				r.id = *item.Id
+				setResourceId(*item.Id)
 			}
 		}
 		if r.id == "" {
